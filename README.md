@@ -13,7 +13,7 @@ A Pico-Park-style couch co-op party game where one screen is the "stage" and up 
 
 1. **Start all services:**
    ```bash
-   docker-compose up
+   docker-compose up --build
    ```
 
 2. **Open Host Screen (TV/Laptop):**
