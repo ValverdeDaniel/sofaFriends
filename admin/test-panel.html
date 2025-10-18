@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SofaFriends - Admin Test Panel</title>
+    <link rel="stylesheet" href="./styles/admin-panel.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔧 SofaFriends Admin Panel</h1>
+            <p>Automated Testing & Manual Testing Tools</p>
+            <p class="secret-note">🤫 Shhh... This is a secret page! Access via: /admin/test-panel.html</p>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <button class="btn btn-primary" id="run-all-tests">
+                ▶️ Run All Tests
+            </button>
+            <button class="btn btn-secondary" id="run-controller-tests">
+                📱 Controller Tests
+            </button>
+            <button class="btn btn-secondary" id="run-keyboard-tests">
+                ⌨️ Keyboard Tests
+            </button>
+            <button class="btn btn-secondary" id="run-websocket-tests">
+                🌐 WebSocket Tests
+            </button>
+            <button class="btn btn-warning" id="clear-results">
+                🗑️ Clear Results
+            </button>
+        </div>
+
+        <!-- Manual Testing Tools -->
+        <div class="manual-tools">
+            <h2>📋 Manual Testing Tools</h2>
+
+            <!-- Input Monitor -->
+            <div class="tool-section">
+                <h3>Input State Monitor</h3>
+                <div class="input-monitor">
+                    <div class="input-state">
+                        <span class="input-name">Left</span>
+                        <span class="input-value inactive" id="monitor-left">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">Right</span>
+                        <span class="input-value inactive" id="monitor-right">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">Jump</span>
+                        <span class="input-value inactive" id="monitor-jump">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">Action</span>
+                        <span class="input-value inactive" id="monitor-action">OFF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual Controller -->
+            <div class="tool-section">
+                <h3>Virtual Phone Controller (Click & Hold)</h3>
+                <div class="virtual-controller">
+                    <button class="virtual-btn left" id="virtual-left">◄ LEFT</button>
+                    <button class="virtual-btn jump" id="virtual-jump">▲ JUMP</button>
+                    <button class="virtual-btn right" id="virtual-right">► RIGHT</button>
+                    <button class="virtual-btn action" id="virtual-action">● ACTION</button>
+                </div>
+            </div>
+
+            <!-- Keyboard Tester -->
+            <div class="tool-section">
+                <h3>Keyboard Input Tester</h3>
+                <p style="color: #bbb; margin-bottom: 10px;">
+                    Press keyboard keys to test. Player 1: WASD | Player 2: Arrow Keys
+                </p>
+                <div class="input-monitor">
+                    <div class="input-state">
+                        <span class="input-name">P1 Left (A)</span>
+                        <span class="input-value inactive" id="kb-p1-left">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">P1 Right (D)</span>
+                        <span class="input-value inactive" id="kb-p1-right">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">P1 Jump (W)</span>
+                        <span class="input-value inactive" id="kb-p1-jump">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">P2 Left (←)</span>
+                        <span class="input-value inactive" id="kb-p2-left">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">P2 Right (→)</span>
+                        <span class="input-value inactive" id="kb-p2-right">OFF</span>
+                    </div>
+                    <div class="input-state">
+                        <span class="input-name">P2 Jump (↑)</span>
+                        <span class="input-value inactive" id="kb-p2-jump">OFF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WebSocket Tester -->
+            <div class="tool-section">
+                <h3>WebSocket Connection Tester</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input
+                        type="text"
+                        id="ws-room-code"
+                        placeholder="Room Code (e.g., ABC123)"
+                        style="flex: 1; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; font-size: 14px;"
+                    >
+                    <button class="btn btn-secondary" id="ws-connect" style="padding: 12px 25px;">
+                        Connect
+                    </button>
+                    <button class="btn btn-warning" id="ws-disconnect" style="padding: 12px 25px;" disabled>
+                        Disconnect
+                    </button>
+                </div>
+                <div id="ws-status" style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; color: #bbb; font-size: 14px;">
+                    Not connected
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div id="test-results"></div>
+    </div>
+
+    <!-- Load Test Framework -->
+    <script src="./tests/test-runner.js"></script>
+    <script src="./tests/mock-websocket.js"></script>
+    <script src="./tests/controller-tests.js"></script>
+    <script src="./tests/keyboard-tests.js"></script>
+    <script src="./tests/websocket-tests.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        // Initialize test runner
+        const runner = new TestRunner();
+
+        // Load all test suites
+        createControllerTests(runner);
+        createKeyboardTests(runner);
+        createWebSocketTests(runner);
+
+        // Button handlers
+        document.getElementById('run-all-tests').addEventListener('click', async () => {
+            document.getElementById('test-results').innerHTML = '<div class="loading">Running tests</div>';
+            const results = await runner.runAll();
+            runner.renderResults('test-results');
+        });
+
+        document.getElementById('run-controller-tests').addEventListener('click', async () => {
+            document.getElementById('test-results').innerHTML = '<div class="loading">Running controller tests</div>';
+            const controllerRunner = new TestRunner();
+            createControllerTests(controllerRunner);
+            await controllerRunner.runAll();
+            controllerRunner.renderResults('test-results');
+        });
+
+        document.getElementById('run-keyboard-tests').addEventListener('click', async () => {
+            document.getElementById('test-results').innerHTML = '<div class="loading">Running keyboard tests</div>';
+            const keyboardRunner = new TestRunner();
+            createKeyboardTests(keyboardRunner);
+            await keyboardRunner.runAll();
+            keyboardRunner.renderResults('test-results');
+        });
+
+        document.getElementById('run-websocket-tests').addEventListener('click', async () => {
+            document.getElementById('test-results').innerHTML = '<div class="loading">Running WebSocket tests</div>';
+            const wsRunner = new TestRunner();
+            createWebSocketTests(wsRunner);
+            await wsRunner.runAll();
+            wsRunner.renderResults('test-results');
+        });
+
+        document.getElementById('clear-results').addEventListener('click', () => {
+            document.getElementById('test-results').innerHTML = '';
+        });
+
+        // Virtual Controller
+        const virtualInputState = {
+            left: false,
+            right: false,
+            jump: false,
+            action: false
+        };
+
+        function updateMonitor(input, value) {
+            const element = document.getElementById(`monitor-${input}`);
+            element.textContent = value ? 'ON' : 'OFF';
+            element.className = value ? 'input-value active' : 'input-value inactive';
+        }
+
+        ['left', 'right', 'jump', 'action'].forEach(input => {
+            const btn = document.getElementById(`virtual-${input}`);
+
+            btn.addEventListener('mousedown', () => {
+                virtualInputState[input] = true;
+                updateMonitor(input, true);
+            });
+
+            btn.addEventListener('mouseup', () => {
+                virtualInputState[input] = false;
+                updateMonitor(input, false);
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                virtualInputState[input] = false;
+                updateMonitor(input, false);
+            });
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                virtualInputState[input] = true;
+                updateMonitor(input, true);
+            });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                virtualInputState[input] = false;
+                updateMonitor(input, false);
+            });
+        });
+
+        // Keyboard Tester
+        const keyboardInputState = {
+            p1: { left: false, right: false, jump: false },
+            p2: { left: false, right: false, jump: false }
+        };
+
+        function updateKeyboardMonitor(player, input, value) {
+            const element = document.getElementById(`kb-${player}-${input}`);
+            element.textContent = value ? 'ON' : 'OFF';
+            element.className = value ? 'input-value active' : 'input-value inactive';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            // Player 1 (WASD)
+            if (e.key === 'a' || e.key === 'A') {
+                keyboardInputState.p1.left = true;
+                updateKeyboardMonitor('p1', 'left', true);
+            }
+            if (e.key === 'd' || e.key === 'D') {
+                keyboardInputState.p1.right = true;
+                updateKeyboardMonitor('p1', 'right', true);
+            }
+            if (e.key === 'w' || e.key === 'W') {
+                keyboardInputState.p1.jump = true;
+                updateKeyboardMonitor('p1', 'jump', true);
+            }
+
+            // Player 2 (Arrow keys)
+            if (e.key === 'ArrowLeft') {
+                keyboardInputState.p2.left = true;
+                updateKeyboardMonitor('p2', 'left', true);
+            }
+            if (e.key === 'ArrowRight') {
+                keyboardInputState.p2.right = true;
+                updateKeyboardMonitor('p2', 'right', true);
+            }
+            if (e.key === 'ArrowUp') {
+                keyboardInputState.p2.jump = true;
+                updateKeyboardMonitor('p2', 'jump', true);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            // Player 1
+            if (e.key === 'a' || e.key === 'A') {
+                keyboardInputState.p1.left = false;
+                updateKeyboardMonitor('p1', 'left', false);
+            }
+            if (e.key === 'd' || e.key === 'D') {
+                keyboardInputState.p1.right = false;
+                updateKeyboardMonitor('p1', 'right', false);
+            }
+            if (e.key === 'w' || e.key === 'W') {
+                keyboardInputState.p1.jump = false;
+                updateKeyboardMonitor('p1', 'jump', false);
+            }
+
+            // Player 2
+            if (e.key === 'ArrowLeft') {
+                keyboardInputState.p2.left = false;
+                updateKeyboardMonitor('p2', 'left', false);
+            }
+            if (e.key === 'ArrowRight') {
+                keyboardInputState.p2.right = false;
+                updateKeyboardMonitor('p2', 'right', false);
+            }
+            if (e.key === 'ArrowUp') {
+                keyboardInputState.p2.jump = false;
+                updateKeyboardMonitor('p2', 'jump', false);
+            }
+        });
+
+        // WebSocket Tester
+        let testWs = null;
+        const wsStatus = document.getElementById('ws-status');
+        const wsConnect = document.getElementById('ws-connect');
+        const wsDisconnect = document.getElementById('ws-disconnect');
+        const wsRoomCode = document.getElementById('ws-room-code');
+
+        wsConnect.addEventListener('click', () => {
+            const roomCode = wsRoomCode.value.trim().toUpperCase();
+            if (roomCode.length !== 6) {
+                wsStatus.textContent = '❌ Room code must be 6 characters';
+                wsStatus.style.color = '#FF6B6B';
+                return;
+            }
+
+            const wsUrl = `ws://${window.location.hostname}:9000/ws/${roomCode}`;
+            testWs = new WebSocket(wsUrl);
+
+            wsStatus.textContent = '🔄 Connecting...';
+            wsStatus.style.color = '#F7DC6F';
+
+            testWs.onopen = () => {
+                wsStatus.textContent = `✅ Connected to room ${roomCode}`;
+                wsStatus.style.color = '#4CAF50';
+                wsConnect.disabled = true;
+                wsDisconnect.disabled = false;
+
+                // Send handshake
+                testWs.send(JSON.stringify({
+                    type: 'handshake',
+                    role: 'controller',
+                    name: 'Test Admin'
+                }));
+            };
+
+            testWs.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                wsStatus.textContent = `📨 Received: ${msg.type}`;
+                wsStatus.style.color = '#4ECDC4';
+            };
+
+            testWs.onerror = () => {
+                wsStatus.textContent = '❌ Connection error';
+                wsStatus.style.color = '#FF6B6B';
+            };
+
+            testWs.onclose = () => {
+                wsStatus.textContent = '⭕ Disconnected';
+                wsStatus.style.color = '#bbb';
+                wsConnect.disabled = false;
+                wsDisconnect.disabled = true;
+            };
+        });
+
+        wsDisconnect.addEventListener('click', () => {
+            if (testWs) {
+                testWs.close();
+                testWs = null;
+            }
+        });
+
+        // Auto-run tests on load (optional)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autorun') === 'true') {
+            setTimeout(() => {
+                document.getElementById('run-all-tests').click();
+            }, 500);
+        }
+    </script>
+</body>
+</html>

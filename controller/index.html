@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>SofaFriends Controller</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            touch-action: none;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Join Screen */
+        #join-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            color: white;
+        }
+
+        #join-screen.hidden {
+            display: none;
+        }
+
+        #join-screen h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #4ECDC4;
+        }
+
+        #join-screen p {
+            font-size: 16px;
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        #room-code-input {
+            width: 280px;
+            padding: 20px;
+            font-size: 28px;
+            text-align: center;
+            border: 3px solid #4ECDC4;
+            border-radius: 15px;
+            background: #2a2a3e;
+            color: white;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        #join-btn {
+            padding: 18px 60px;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        #join-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Lobby Screen */
+        #lobby-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: white;
+            padding: 20px;
+        }
+
+        #lobby-screen.active {
+            display: flex;
+        }
+
+        .player-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 64px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        .player-info {
+            text-align: center;
+        }
+
+        .player-info h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .player-info p {
+            font-size: 16px;
+            color: #bbb;
+        }
+
+        /* Game Screen */
+        #game-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #game-screen.active {
+            display: block;
+        }
+
+        .controls {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .control-btn {
+            border: none;
+            border-radius: 20px;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .control-btn.pressed {
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        #btn-left {
+            background: linear-gradient(135deg, #FF6B6B 0%, #C44569 100%);
+            grid-column: 1;
+            grid-row: 1 / 3;
+        }
+
+        #btn-jump {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        #btn-right {
+            background: linear-gradient(135deg, #FFA07A 0%, #F77062 100%);
+            grid-column: 1;
+            grid-row: 1 / 3;
+            display: none;
+        }
+
+        #btn-action {
+            background: linear-gradient(135deg, #F7DC6F 0%, #F39C12 100%);
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        /* Status indicator */
+        #status-bar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-dot.connected {
+            background: #4ECDC4;
+            box-shadow: 0 0 10px #4ECDC4;
+        }
+
+        .status-dot.disconnected {
+            background: #FF6B6B;
+        }
+
+        /* D-pad style alternative */
+        .dpad-container {
+            position: absolute;
+            bottom: 80px;
+            left: 40px;
+            width: 180px;
+            height: 180px;
+        }
+
+        .dpad-btn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        #dpad-left {
+            left: 0;
+            top: 60px;
+        }
+
+        #dpad-right {
+            right: 0;
+            top: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="status-bar">
+            <span class="status-dot disconnected"></span>
+            <span id="status-text">Not connected</span>
+        </div>
+
+        <!-- Join Screen -->
+        <div id="join-screen">
+            <h1>🎮 SofaFriends</h1>
+            <p>Enter room code from TV screen</p>
+            <input
+                type="text"
+                id="room-code-input"
+                placeholder="ABC123"
+                maxlength="6"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="characters"
+            >
+            <button id="join-btn">Join Game</button>
+        </div>
+
+        <!-- Lobby Screen -->
+        <div id="lobby-screen">
+            <div class="player-avatar" id="player-avatar">👤</div>
+            <div class="player-info">
+                <h2 id="player-name">Player</h2>
+                <p>Waiting for host to start...</p>
+                <p style="margin-top: 20px; font-size: 14px;" id="room-display"></p>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen">
+            <div class="controls">
+                <button class="control-btn" id="btn-left" data-action="left">
+                    ◄
+                </button>
+                <button class="control-btn" id="btn-jump" data-action="jump">
+                    ▲
+                </button>
+                <button class="control-btn" id="btn-action" data-action="action">
+                    ●
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./controller.js"></script>
+</body>
+</html>
