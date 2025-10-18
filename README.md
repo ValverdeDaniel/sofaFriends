@@ -75,13 +75,7 @@ Claude Code is an AI coding assistant that can help you develop, debug, and unde
 
 ## 🚀 Quick Start
 
-### Step 1: Clone and Navigate to Project
-```bash
-git clone <your-repo-url>
-cd sofafriends
-```
-
-### Step 2: Start Docker Services
+### Step 1: Start Docker Services
 
 Make sure Docker Desktop is running (check for whale icon in system tray), then:
 
@@ -90,24 +84,14 @@ docker-compose up --build
 ```
 
 This command will:
-- Download necessary Docker images (first time only)
+- Download necessary Docker images (first time: ~2-3 minutes)
 - Build the Python backend server
 - Start Redis database for room management
 - Start host client web server (port 9001)
 - Start controller client web server (port 3001)
 - Start backend API (port 9000)
 
-**Note:** First run may take 2-3 minutes to download images and build. Subsequent runs are much faster.
-
-You should see output like:
-```
-✔ Container sofafriends-redis-1       Started
-✔ Container sofafriends-server-1      Started
-✔ Container sofafriends-host-1        Started
-✔ Container sofafriends-controller-1  Started
-```
-
-### Step 3: Open the Game
+### Step 2: Open the Game
 
 **Option A: Full Multiplayer Mode (TV + Phones)**
 
@@ -140,7 +124,7 @@ Perfect for solo development and testing:
    - **Player 1:** W (jump), A (left), D (right)
    - **Player 2:** ↑ (jump), ← (left), → (right)
 
-### Step 4: Stopping the Game
+### Step 3: Stopping the Game
 
 Press `Ctrl+C` in the terminal where docker-compose is running, then:
 
@@ -152,6 +136,14 @@ To completely remove all data and start fresh:
 ```bash
 docker-compose down -v
 ```
+
+### Need More Details?
+
+For comprehensive guides, see the [docs/](docs/) folder:
+- **[docs/SETUP.md](docs/SETUP.md)** - Complete installation guide
+- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - Detailed quick start
+- **[docs/HOW_TO_PLAY.md](docs/HOW_TO_PLAY.md)** - Gameplay guide
+- **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Developer guide
 
 ---
 
